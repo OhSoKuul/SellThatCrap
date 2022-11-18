@@ -2,7 +2,8 @@
 
 Simple World of Warcraft Addon to automatically sell poor quality items at Vendors
 
-## The MIT License (MIT)
+## License and disclaimer
+MIT License
 
 Copyright © `<2022>` `<Kuul>`
 
