@@ -1,0 +1,7 @@
+## Interface: 100002
+## Title: SellThatCrap
+## Notes: Sells all items of |cFF808080poor quality|r .
+## Author: Kuul
+## Version: 1.0
+
+main.lua
