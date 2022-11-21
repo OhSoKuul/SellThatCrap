@@ -1,5 +1,4 @@
 local SellThatCrap = {}
-local crapList = {}
 
 function SellThatCrap:onList(itemLink)
     if C_Item.GetItemQualityByID(itemLink) == 0 then
@@ -35,6 +34,12 @@ end
 local function SellThatCrap_OnEvent(self, event, ...)
     if (event == "MERCHANT_SHOW") then
         SellThatCrap.SellJunk(self)
+    elseif (event == "VARIABLES_LOADED") then
+        if crapList == nil then
+            crapList = {}
+        end
+        print("Thanks for using SellThatCrap.")
+        print("#" .. table.maxn(crapList) .. " on the List.")
     end
 end
 
@@ -79,6 +84,7 @@ end
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("MERCHANT_SHOW")
+f:RegisterEvent("VARIABLES_LOADED")
 f:SetScript("OnEvent", SellThatCrap_OnEvent)
 
 SLASH_CRAP1 = "/crap"
