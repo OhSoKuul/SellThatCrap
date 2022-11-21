@@ -32,3 +32,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 Checkout the repo and move to
 `Interface/Addons`
 
+## Syntax for /crap
+SellThatCrap now features a temporary list which is lost after every logout,
+reload or gamecrash.
+
+* `/crap add item` - Add item to crapList 
+* `/crap rm  item` - Remove item from crapList 
+* `/crap show`     - List all crap in crapList 
+* `/crap clear`    - Remove everything from crapList
