@@ -1,9 +1,6 @@
 local SellThatCrap = {}
 
 function SellThatCrap:onList(itemLink)
-    if C_Item.GetItemQualityByID(itemLink) == 0 then
-        return true
-    end
     local name = C_Item.GetItemNameByID(itemLink)
     for k, v in ipairs(crapList) do
         local n = C_Item.GetItemNameByID(v)
@@ -11,81 +8,99 @@ function SellThatCrap:onList(itemLink)
             return true
         end
     end
-    return false;
+    return false
 end
 
-function SellThatCrap:isCrap(bag, slot)
+function SellThatCrap:isCrapOrOnList(bag, slot)
     local itemLink = C_Container.GetContainerItemLink(bag, slot)
-    return itemLink and SellThatCrap:onList(itemLink)
+    local crap = false
+    if itemLink ~= nil then
+        crap = C_Item.GetItemQualityByID(itemLink) == 0 or SellThatCrap:onList(itemLink)
+    end
+    if crap then
+        print("Selling ", itemLink)
+    end
+    return crap
 end
 
-function SellThatCrap:SellJunk()
+--########################### Frame Events
+
+function SellThatCrap:MERCHANT_SHOW()
     for bag = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            if SellThatCrap:isCrap(bag, slot) then
-                local itemLink = C_Container.GetContainerItemLink(bag, slot)
-                print("Selling ", itemLink)
+            if SellThatCrap:isCrapOrOnList(bag, slot) then
                 C_Container.UseContainerItem(bag, slot)
             end
         end
     end
 end
 
-local function SellThatCrap_OnEvent(self, event, ...)
-    if (event == "MERCHANT_SHOW") then
-        SellThatCrap.SellJunk(self)
-    elseif (event == "VARIABLES_LOADED") then
-        if crapList == nil then
-            crapList = {}
+function SellThatCrap:VARIABLES_LOADED()
+    if crapList == nil then
+        crapList = {}
+    end
+
+    print("Thanks for using SellThatCrap.")
+    print("#" .. table.maxn(crapList) .. " on the List.")
+end
+
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("MERCHANT_SHOW")
+frame:RegisterEvent("VARIABLES_LOADED")
+
+frame:SetScript("OnEvent", function(this, event, ...)
+    SellThatCrap[event](SellThatCrap, ...)
+end)
+
+--########################### CommandLine args
+
+function SellThatCrap:add(args)
+    local found = false
+    for k, v in ipairs(crapList) do
+        if v == args then
+            found = true
+            break
         end
-        print("Thanks for using SellThatCrap.")
-        print("#" .. table.maxn(crapList) .. " on the List.")
+    end
+    if not found and args ~= nil then
+        table.insert(crapList, args)
+        print("Added " .. args .. " to CrapList")
     end
 end
 
-function commands(msg, editbox)
+function SellThatCrap:show(args)
+    print("#" .. table.maxn(crapList) .. " on the List:")
+    for k, v in ipairs(crapList) do
+        print(k, v)
+    end
+end
+
+function SellThatCrap:rm(args)
+    for k, v in ipairs(crapList) do
+        if v == args then
+            table.remove(crapList, k)
+            print("Removed " .. args .. " from CrapList")
+        end
+    end
+end
+
+function SellThatCrap:clear(args)
+    print("Clearing crap off of list")
+    crapList = {}
+end
+
+function commandos(msg, editbox)
     local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
-    if cmd == "add" and args ~= "" then
-        local found = false
-        for k, v in ipairs(crapList) do
-            if v == args then
-                found = true
-                break
-            end
-        end
-        if not found then
-            table.insert(crapList, args)
-            print("Added " .. args .. " to CrapList")
-        end
-    elseif cmd == "show" then
-        print("#" .. table.maxn(crapList) .. " on the List:")
-        for k, v in ipairs(crapList) do
-            print(k, v)
-        end
-    elseif cmd == "rm" and args ~= "" then
-        for k, v in ipairs(crapList) do
-            if v == args then
-                table.remove(crapList, k)
-                print("Removed " .. args .. " from CrapList")
-            end
-        end
-    elseif cmd == "clear" then
-        print("Clearing crap off of list")
-        crapList = {}
-    else
-        -- If not handled above, display some sort of help message
+    if SellThatCrap[cmd] == nil then
         print("Syntax for /crap:");
         print("/crap add item - Add item to crapList");
         print("/crap rm  item - Remove item from crapList");
         print("/crap show     - List all crap in crapList");
         print("/crap clear    - Remove everything from crapList");
+    else
+        SellThatCrap[cmd](SellThatCrap,args)
     end
 end
 
-local f = CreateFrame("Frame")
-f:RegisterEvent("MERCHANT_SHOW")
-f:RegisterEvent("VARIABLES_LOADED")
-f:SetScript("OnEvent", SellThatCrap_OnEvent)
-
 SLASH_CRAP1 = "/crap"
-SlashCmdList["CRAP"] = commands
+SlashCmdList["CRAP"] = commandos
