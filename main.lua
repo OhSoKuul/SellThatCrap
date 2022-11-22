@@ -41,7 +41,7 @@ function SellThatCrap:VARIABLES_LOADED()
     end
 
     print("Thanks for using SellThatCrap.")
-    print("#" .. table.maxn(crapList) .. " on the List.")
+    print("#" .. table.maxn(crapList) .. " items on the crapList.")
 end
 
 local frame = CreateFrame("Frame")
